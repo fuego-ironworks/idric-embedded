@@ -39,11 +39,11 @@ validateExportName name =
 ||| Lower exactly the first oracle from Compiler.ANF:
 ||| a nullary export whose entire reachable body is one Int32 literal.
 public export
-lowerExport : String -> ANFDef -> Either String ExportedI32Constant
-lowerExport requestedName (MkAFun [] (APrimVal _ (I32 value))) = do
+lowerExport : String -> Administrative_Normal_Form_Definition -> Either String ExportedI32Constant
+lowerExport requestedName (Make_Administrative_Normal_Form_Function [] (Administrative_Normal_Form_Primitive_Value _ (I32 value))) = do
   name <- validateExportName requestedName
   Right (MkExportedI32Constant name (cast value))
-lowerExport requestedName (MkAFun arguments body) =
+lowerExport requestedName (Make_Administrative_Normal_Form_Function arguments body) =
   Left
     ("Export `" ++ requestedName ++
      "` is outside the first Wasm oracle: expected zero runtime parameters " ++

@@ -19,12 +19,12 @@ backendName : String
 backendName = "wasm"
 
 private
-lookupANFDefinition : Name -> List (Name, ANFDef) -> Maybe ANFDef
-lookupANFDefinition requested [] = Nothing
-lookupANFDefinition requested ((name, definition) :: rest) =
+lookupAdministrative_Normal_Form_Definitioninition : Name -> List (Name, Administrative_Normal_Form_Definition) -> Maybe Administrative_Normal_Form_Definition
+lookupAdministrative_Normal_Form_Definitioninition requested [] = Nothing
+lookupAdministrative_Normal_Form_Definitioninition requested ((name, definition) :: rest) =
   if requested == name
     then Just definition
-    else lookupANFDefinition requested rest
+    else lookupAdministrative_Normal_Form_Definitioninition requested rest
 
 private
 fullyQualifiedExport :
@@ -57,7 +57,7 @@ compileWasm definitions syntax temporaryDirectory outputDirectory
   selectedExport <- selectSingleExport qualifiedExports
   let (internalName, externalName) = selectedExport
   definition <-
-    case lookupANFDefinition internalName (anf compileData) of
+    case lookupAdministrative_Normal_Form_Definitioninition internalName (anf compileData) of
       Nothing =>
         throw
           (UserError
