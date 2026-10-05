@@ -14,29 +14,60 @@ concurrency:
 jobs:
   first-core-module:
     runs-on: ubuntu-24.04
+    env:
+      CHEZ: ${{ github.workspace }}/Idric/_/.tools/bin/scheme
+      SCHEME: ${{ github.workspace }}/Idric/_/.tools/bin/scheme
     steps:
-      - name: Check out Wasm backend
-        uses: actions/checkout@v4
+      - name: Check out exact Wasm candidate
+        uses: actions/checkout@fbc6c1c6e0fdb8ebc2f2be7f0e78bdf242c03734
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
-      - name: Check out pinned Idriç compiler
-        uses: actions/checkout@v4
+      - name: Check out pinned current Idriç compiler
+        uses: actions/checkout@fbc6c1c6e0fdb8ebc2f2be7f0e78bdf242c03734
         with:
           repository: isomorphisms/Idric
-          ref: 081b9cde0591154839fb5d80d76e5570e0436300
+          ref: ef83e1627e0a8b84567ec1f461d3a85c26580019
           path: Idric
 
+      - name: Refresh host package metadata
+        run: sudo apt-get update
       - name: Install host build tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential curl ca-certificates libgmp-dev python3-venv
+        run: sudo apt-get install -y build-essential curl ca-certificates libgmp-dev xz-utils
 
-      - name: Bootstrap pinned Idriç
-        run: ./Idric/edric bootstrap
+      - name: Bootstrap and test pinned current Idriç
+        run: ./Idric/edric all
+      - name: Install current Idriç support
+        run: make -C Idric/_ install-support
+      - name: Install current Idriç libraries
+        run: make -C Idric/_ install-bootstrap-libs
+      - name: Install current compiler API
+        run: make -C Idric/_ install-api IDRIS2_BOOT=${{ github.workspace }}/Idric/build/exec/idris2
 
-      - name: Install pinned Idriç libraries and compiler API
-        run: |
-          make -C Idric install-bootstrap-libs IDRIS2="$GITHUB_WORKSPACE/Idric/build/exec/idris2"
-          make -C Idric install-api IDRIS2_BOOT="$GITHUB_WORKSPACE/Idric/build/exec/idris2"
+      - name: Create independent-engine directory
+        run: mkdir -p .tools
+      - name: Fetch pinned Wasmtime CLI
+        run: curl --fail --location https://github.com/bytecodealliance/wasmtime/releases/download/v48.0.0/wasmtime-v48.0.0-x86_64-linux.tar.xz -o .tools/wasmtime-v48.0.0-x86_64-linux.tar.xz
+      - name: Verify independent-engine digest
+        run: sha256sum --check tools/wasmtime-cli.sha256
+      - name: Extract verified independent engine
+        run: tar -xJf .tools/wasmtime-v48.0.0-x86_64-linux.tar.xz -C .tools
 
-      - name: Generate, inspect, validate, execute, and reproduce module
-        run: make verify IDRIC="$GITHUB_WORKSPACE/Idric/build/exec/idris2"
+      - name: Generate, compare independent bytes, execute, and reproduce
+        run: make verify IDRIC=${{ github.workspace }}/Idric/build/exec/idris2 WASMTIME=${{ github.workspace }}/.tools/wasmtime-v48.0.0-x86_64-linux/wasmtime
+
+      - name: Typecheck unsupported source before backend refusal
+        run: ${{ github.workspace }}/Idric/build/exec/idris2 --check --source-dir tests tests/UnsupportedFunction.idric
+      - name: Require unsupported function to be rejected
+        id: unsupported
+        continue-on-error: true
+        env:
+          IDRIS2_PATH: ${{ github.workspace }}/build/ttc
+        run: ./build/exec/idric-wasm --cg wasm --source-dir tests tests/UnsupportedFunction.idric -o unsupported-function > build/exec/unsupported.log 2>&1
+      - name: Fail if unsupported function was accepted
+        if: steps.unsupported.outcome != 'failure'
+        run: exit 1
+      - name: Require the declared reachable-program rejection
+        run: grep -F 'wasm rejected reachable program:' build/exec/unsupported.log
+      - name: Require no artifact after refusal
+        run: test ! -e build/exec/unsupported-function.wasm

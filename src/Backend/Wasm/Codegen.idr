@@ -34,6 +34,18 @@ fullyQualifiedExport (internalName, externalName) = do
   pure (qualifiedName, externalName)
 
 private
+selectSingleExport : List (Name, String) -> Core (Name, String)
+selectSingleExport [selected] = pure selected
+selectSingleExport [] =
+  throw
+    (UserError
+      "wasm: no export selected; add %export \"wasm:<name>\" to the first oracle")
+selectSingleExport _ =
+  throw
+    (UserError
+      "wasm: the first executable slice admits exactly one exported function")
+
+private
 compileWasm :
   Ref Ctxt Defs -> Ref Syn SyntaxInfo ->
   (temporaryDirectory : String) -> (outputDirectory : String) ->
@@ -42,17 +54,8 @@ compileWasm definitions syntax temporaryDirectory outputDirectory
             term requestedOutputName = do
   compileData <- getCompileDataWith [backendName] False ANF term
   qualifiedExports <- traverse fullyQualifiedExport (exported compileData)
-  (internalName, externalName) <-
-    case qualifiedExports of
-      [selected] => pure selected
-      [] =>
-        throw
-          (UserError
-            "wasm: no export selected; add %export \"wasm:<name>\" to the first oracle")
-      _ =>
-        throw
-          (UserError
-            "wasm: the first executable slice admits exactly one exported function")
+  selectedExport <- selectSingleExport qualifiedExports
+  let (internalName, externalName) = selectedExport
   definition <-
     case lookupANFDefinition internalName (anf compileData) of
       Nothing =>

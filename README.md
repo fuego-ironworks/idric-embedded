@@ -34,22 +34,28 @@ that this backend targets only Wasm 1.0.
 
 ## Verification
 
-```sh
-make verify IDRIC=/path/to/Idric/build/exec/idris2
-```
+The hosted gate invokes the existing Make targets with the exact Idriç compiler and the verified Wasmtime executable.
 
 The gate pins Idriç commit
-`081b9cde0591154839fb5d80d76e5570e0436300` and Wasmtime Python `48.0.0`.
-It:
+`ef83e1627e0a8b84567ec1f461d3a85c26580019` and Wasmtime CLI `48.0.0`.
+The release archive is SHA-256 checked before extraction. It:
 
-1. typechecks and builds the custom `wasm` code generator;
-2. compiles `tests/KnownInteger.idric` to `build/exec/known-integer.wasm`;
-3. independently inspects the binary shape and rejects any extra section;
-4. asks Wasmtime to parse/validate the binary;
-5. requires the module to have zero imports;
-6. instantiates it with an empty import list and requires
-   `idric_answer() == 42`;
-7. recompiles the source twice and requires byte-identical `.wasm` output.
+1. bootstraps and tests that compiler, then typechecks and builds the backend;
+2. compiles `tests/KnownInteger.idric` through its real frontend and ANF;
+3. compares the generated module with an independently specified 45-byte Core
+   binary: zero imports, section IDs `1, 3, 7, 10`, exactly one nullary
+   `i32` function/export and the body `i32.const 42; end`;
+4. asks the pinned Wasmtime executable to validate, instantiate, and invoke
+   `idric_answer`, requiring stdout `42\n`;
+5. recompiles twice and requires identical output bytes;
+6. first typechecks a one-argument source with Idriç, then requires the Wasm
+   backend's explicit reachable-program rejection and absence of an artifact.
+
+The independent binary is an oracle only; no target copies it into the
+candidate output. This is not a general WebAssembly binary inspector. The CLI
+output protocol is pinned to this Wasmtime release, not assumed stable across
+future versions. No first-party Python verifier or Python Wasmtime wrapper is
+introduced.
 
 Wasmtime is only the pinned independent validation/execution engine. The
 generated module imports nothing and does not depend on JavaScript, browser
