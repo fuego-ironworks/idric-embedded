@@ -3,6 +3,7 @@ module Backend.Wasm.Lower
 import Backend.Wasm.IR
 import Compiler.ANF
 import Core.Name
+import Core.TT
 
 %default covering
 
