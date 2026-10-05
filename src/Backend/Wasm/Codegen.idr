@@ -11,6 +11,7 @@ import Core.Env
 import Core.TT
 import Idris.Syntax
 import Libraries.Utils.Path
+import System.File.Error
 
 %default covering
 
