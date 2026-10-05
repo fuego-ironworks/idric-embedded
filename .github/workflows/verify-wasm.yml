@@ -19,12 +19,12 @@ jobs:
       SCHEME: ${{ github.workspace }}/Idric/_/.tools/bin/scheme
     steps:
       - name: Check out exact Wasm candidate
-        uses: actions/checkout@fbc6c1c6e0fdb8ebc2f2be7f0e78bdf242c03734
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Check out pinned current Idriç compiler
-        uses: actions/checkout@fbc6c1c6e0fdb8ebc2f2be7f0e78bdf242c03734
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
         with:
           repository: isomorphisms/Idric
           ref: ef83e1627e0a8b84567ec1f461d3a85c26580019
