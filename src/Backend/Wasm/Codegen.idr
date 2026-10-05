@@ -52,7 +52,7 @@ compileWasm :
   ClosedTerm -> (requestedOutputName : String) -> Core (Maybe String)
 compileWasm definitions syntax temporaryDirectory outputDirectory
             term requestedOutputName = do
-  compileData <- getCompileDataWith [backendName] False ANF term
+  compileData <- getCompileDataWith [backendName] False Compiler.Common.Administrative_Normal_Form term
   qualifiedExports <- traverse fullyQualifiedExport (exported compileData)
   selectedExport <- selectSingleExport qualifiedExports
   let (internalName, externalName) = selectedExport
