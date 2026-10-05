@@ -11,21 +11,28 @@ import Core.Env
 import Core.TT
 import Idris.Syntax
 import Libraries.Utils.Path
+import System
 import System.File.Error
 
 %default covering
+
+-- Driver post-options may display UserError and still exit zero.
+-- Backend refusal and artifact I/O failure must fail the command.
+private
+rejectBackend : String -> Core value
+rejectBackend explanation = coreLift $ die ("Error: " ++ explanation)
 
 public export
 backendName : String
 backendName = "wasm"
 
 private
-lookupAdministrative_Normal_Form_Definitioninition : Name -> List (Name, Administrative_Normal_Form_Definition) -> Maybe Administrative_Normal_Form_Definition
-lookupAdministrative_Normal_Form_Definitioninition requested [] = Nothing
-lookupAdministrative_Normal_Form_Definitioninition requested ((name, definition) :: rest) =
+lookupDefinition : Name -> List (Name, Administrative_Normal_Form_Definition) -> Maybe Administrative_Normal_Form_Definition
+lookupDefinition requested [] = Nothing
+lookupDefinition requested ((name, definition) :: rest) =
   if requested == name
     then Just definition
-    else lookupAdministrative_Normal_Form_Definitioninition requested rest
+    else lookupDefinition requested rest
 
 private
 fullyQualifiedExport :
@@ -38,13 +45,11 @@ private
 selectSingleExport : List (Name, String) -> Core (Name, String)
 selectSingleExport [selected] = pure selected
 selectSingleExport [] =
-  throw
-    (UserError
-      "wasm: no export selected; add %export \"wasm:<name>\" to the first oracle")
+  rejectBackend
+    "wasm: no export selected; add %export \"wasm:<name>\" to the first oracle"
 selectSingleExport _ =
-  throw
-    (UserError
-      "wasm: the first executable slice admits exactly one exported function")
+  rejectBackend
+    "wasm: the first executable slice admits exactly one exported function"
 
 private
 compileWasm :
@@ -58,39 +63,36 @@ compileWasm definitions syntax temporaryDirectory outputDirectory
   selectedExport <- selectSingleExport qualifiedExports
   let (internalName, externalName) = selectedExport
   definition <-
-    case lookupAdministrative_Normal_Form_Definitioninition internalName (anf compileData) of
+    case lookupDefinition internalName (anf compileData) of
       Nothing =>
-        throw
-          (UserError
-            ("wasm: no ANF definition was produced for exported function `" ++
-             show internalName ++ "`"))
+        rejectBackend
+          ("wasm: no ANF definition was produced for exported function `" ++
+           show internalName ++ "`")
       Just found => pure found
   lowered <-
     case lowerExport externalName definition of
       Left explanation =>
-        throw (UserError ("wasm rejected reachable program: " ++ explanation))
+        rejectBackend ("wasm rejected reachable program: " ++ explanation)
       Right function => pure function
   bytes <-
     case encodeModule lowered of
       Left explanation =>
-        throw (UserError ("wasm binary encoding failed: " ++ explanation))
+        rejectBackend ("wasm binary encoding failed: " ++ explanation)
       Right encoded => pure encoded
   let outputFile = outputDirectory </> (requestedOutputName ++ ".wasm")
   writeResult <- coreLift $ writeModuleFile outputFile bytes
   case writeResult of
     Left error =>
-      throw
-        (UserError
-          ("wasm: could not write `" ++ outputFile ++ "`: " ++ show error))
+      rejectBackend
+        ("wasm: could not write `" ++ outputFile ++ "`: " ++ show error)
     Right () => pure (Just outputFile)
 
 private
 executeWasm :
   Ref Ctxt Defs -> Ref Syn SyntaxInfo -> String -> ClosedTerm -> Core ()
 executeWasm definitions syntax temporaryDirectory term =
-  throw
-    (UserError
-      "wasm emits a core module; execute it with an explicitly chosen host runtime")
+  rejectBackend
+    "wasm emits a core module; execute it with an explicitly chosen host runtime"
 
 public export
 wasmCodegen : Codegen

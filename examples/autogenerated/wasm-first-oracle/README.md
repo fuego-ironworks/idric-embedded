@@ -27,3 +27,10 @@ not broader Wasm support or physical-device acceptance.
 Sources: tests/KnownInteger.idric and tests/UnsupportedFunction.idric.
 Resulting language work: none asserted; backend integration bugs remain visible
 in the same PR and fresh checks decide whether the repair is accepted.
+
+Further observed failure at dfff3093a9c939e380da5e44047b75850d784709:
+positive independent bytes, Wasmtime execution and determinism all passed,
+but the frontend caught backend UserError and returned zero for the unsupported
+function. Backend-specific refusal and artifact I/O failure now exit failure
+through System.die lifted into Core. The strict negative exit, diagnostic and
+absent-artifact gates remain; no accepted ANF shape is added.
