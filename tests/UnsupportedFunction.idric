@@ -1,0 +1,8 @@
+module UnsupportedFunction
+
+%export "wasm:unsupported_identity"
+unsupported_identity : Int32 → Int32
+unsupported_identity input_word = input_word
+
+main : IO ()
+main = pure ()

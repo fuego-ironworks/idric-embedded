@@ -1,0 +1,9 @@
+module KnownInteger
+
+||| First executable Wasm oracle: a real Idriç export with an Int32 literal.
+%export "wasm:idric_answer"
+idric_answer : Int32
+idric_answer = 42
+
+main : IO ()
+main = pure ()

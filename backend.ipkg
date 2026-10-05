@@ -1,0 +1,16 @@
+package idric_wasm
+version = 0.1.0
+
+sourcedir = "src"
+
+depends = idris2
+
+modules =
+  Backend.Wasm.IR,
+  Backend.Wasm.Lower,
+  Backend.Wasm.Binary,
+  Backend.Wasm.Codegen,
+  Backend.Wasm.Main
+
+main = Backend.Wasm.Main
+executable = idric-wasm
