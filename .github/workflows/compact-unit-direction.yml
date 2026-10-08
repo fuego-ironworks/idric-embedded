@@ -2,20 +2,39 @@ name: compact unit direction codec
 
 on:
   pull_request:
-    paths:
-      - 'shared/compact-unit-direction/**'
-      - '.github/workflows/compact-unit-direction.yml'
   push:
-    branches:
-      - main
-    paths:
-      - 'shared/compact-unit-direction/**'
-      - '.github/workflows/compact-unit-direction.yml'
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   host-oracle:
     runs-on: ubuntu-24.04
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
-      - name: Run portable codec fixture
-        run: sh shared/compact-unit-direction/test.sh
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: isomorphisms/ai-ci/ick-host@f538ed81669ceb2d521b65fc3b3af7c2e51dd2f2
+        id: ick
+      - name: Execute independent and exhaustive codec tests
+        run: make test ICK="${{ steps.ick.outputs.compiler }}" ICK_LINK_FLAGS="${{ steps.ick.outputs.link_flags }}"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: isomorphisms/ai-ci
+          ref: f538ed81669ceb2d521b65fc3b3af7c2e51dd2f2
+          path: .aici
+          sparse-checkout: |
+            c-source
+            src/aici.c
+            contracts/build-toolchain-v0.contract.tsv
+          persist-credentials: false
+      - name: Enforce Icky assignments in maintained sources
+        run: make -f .aici/c-source/Makefile check ICK="${{ steps.ick.outputs.compiler }}" ICK_LINK_FLAGS="${{ steps.ick.outputs.link_flags }}" FILES="shared/compact-unit-direction/compact_unit_direction.h shared/compact-unit-direction/compact_unit_direction_test.c _/tests/direction_equivalence.c _/tests/reference_direction.c"
+      - name: Compile shared executable stage contract
+        run: '"${{ steps.ick.outputs.compiler }}" ${{ steps.ick.outputs.link_flags }} -std=c17 -O2 -Wall -Wextra -Werror .aici/src/aici.c -o "$RUNNER_TEMP/aici-icky"'
+      - name: Verify stage, pin, and exact-head contracts
+        run: '"$RUNNER_TEMP/aici-icky" suite ci/suite.tsv .'

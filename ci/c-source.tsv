@@ -1,0 +1,6 @@
+path	role	qualification
+shared/compact-unit-direction/compact_unit_direction.h	owned-inline-model	pure chart/code/byte maps and bounded publication
+shared/compact-unit-direction/compact_unit_direction_test.c	owned-test	axis bytes; rejection; sphere error bound
+_/tests/direction_equivalence.c	owned-test	exhaustive storage; extreme and binary32 inputs
+_/tests/reference_direction.c	owned-test-adapter	actual ICK adapter for frozen original
+_/tests/reference/compact_unit_direction.h	frozen-comparator	original a526dbe18bc545a9c53319749e8344cec23490bd; never rewritten

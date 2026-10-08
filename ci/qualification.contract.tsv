@@ -1,0 +1,2 @@
+actions_pinned	DIRECTION-ACTION-PINS	.github/workflows/compact-unit-direction.yml
+yaml_primary_checkout_ref	DIRECTION-EXACT-HEAD	.github/workflows/compact-unit-direction.yml	${{ github.event.pull_request.head.sha || github.sha }}
