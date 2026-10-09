@@ -14,17 +14,15 @@ contains no accelerometer-specific magnitude, balanced-gravity reference, or
 physical unit. Those belong to the sensor model that consumes this direction
 codec.
 
-The C header and host test are kept byte-for-byte aligned with the generic
-codec extracted in `Ashtray-Archer/utilities-android-phone-user`. The matching
+The codec was extracted from `Ashtray-Archer/utilities-android-phone-user`.
+Its Icky C value maps retain the same three-byte representation; see
+[the composition and qualification boundary](ICKY-C.md). The matching
 Idriç exact storage model lives in
 `isomorphisms/Idric` under
 `_/examples/unified-higher-mathematics/CompactUnitDirectionStorage.idric`.
 
-Run the host fixture from an arbitrary working directory:
-
-```sh
-sh shared/compact-unit-direction/test.sh
-```
+Run `make test ICK=/absolute/path/to/ick` from the repository, or use the
+Makefile's absolute path with `make -f` from another directory.
 
 The test fixes the six principal-axis byte encodings, rejection of zero and
 nonfinite input, unit-length decoding, and the Q0.11 sphere error bound. It is a
