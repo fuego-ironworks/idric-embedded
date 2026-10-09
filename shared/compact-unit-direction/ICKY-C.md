@@ -1,6 +1,6 @@
 # Functorial Icky C direction codec
 
-The maintained inline model and tests use ← assignment and × multiplication.
+The maintained inline model and tests use ← assignment, × multiplication, and ÷ division.
 Pointer stars and the three-byte layout stay intact. Geometric chart
 coordinates and signed storage codes have distinct types. Encode composes
 direction → octahedral chart → signed Q0.11 codes → three bytes. Decode
@@ -16,7 +16,7 @@ the status API validates it first.
 `make test ICK=/absolute/path/to/ick` replaces the stock-C POSIX test launcher.
 This fixed Makefile interface compiles every maintained test and the frozen
 comparison control with actual ICK. The native producer pins ICK
-c5d28dde9cc333a562b907785d0370b725146cdf, declares prebuilt GCC 13 startup/libgcc
+c61e448251744a2f40ad743ebef1a027bdcd2f9d, declares prebuilt GCC 13 startup/libgcc
 and glibc/libm, and uses host GCC only to bootstrap the compiler.
 
 The inherited independent axis/rejection/131,072-point sphere checks remain.
@@ -34,3 +34,8 @@ copies; this conversion preserves the byte representation and is no longer a
 claim of identical source text. No platform branch, embedded backend,
 accelerometer consumer, firmware package, or physical sensor is qualified by
 the native host result.
+
+The 2026-10-09 division migration changes seventeen binary divisions across
+the maintained header and tests. A forced rebuild with the current ICK
+frontend passed every storage-value, sampled-input, extreme-input, and
+independent sphere check above. The frozen comparison header is unchanged.

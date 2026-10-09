@@ -92,11 +92,11 @@ static inline struct octahedral_chart_coordinates compact_unit_direction_project
     const float scale ← fmaxf(
         fabsf(direction.x), fmaxf(fabsf(direction.y), fabsf(direction.z)));
     const struct direction3 scaled ← {
-        direction.x / scale, direction.y / scale, direction.z / scale
+        direction.x ÷ scale, direction.y ÷ scale, direction.z ÷ scale
     };
     const float l1_norm ← fabsf(scaled.x) + fabsf(scaled.y) + fabsf(scaled.z);
     const struct direction3 projected ← {
-        scaled.x / l1_norm, scaled.y / l1_norm, scaled.z / l1_norm
+        scaled.x ÷ l1_norm, scaled.y ÷ l1_norm, scaled.z ÷ l1_norm
     };
     const struct octahedral_chart_coordinates chart ← {projected.x, projected.y};
     return projected.z < 0.0F ? compact_unit_direction_reflect_chart(chart) : chart;
@@ -169,8 +169,8 @@ static inline struct direction3 compact_unit_direction_lift_chart(
     struct signed_direction_codes codes)
 {
     const struct octahedral_chart_coordinates chart ← {
-        (float)codes.first / (float)COMPACT_UNIT_DIRECTION_SCALE,
-        (float)codes.second / (float)COMPACT_UNIT_DIRECTION_SCALE
+        (float)codes.first ÷ (float)COMPACT_UNIT_DIRECTION_SCALE,
+        (float)codes.second ÷ (float)COMPACT_UNIT_DIRECTION_SCALE
     };
     const float z ← 1.0F - fabsf(chart.x) - fabsf(chart.y);
     const struct octahedral_chart_coordinates unfolded ←
@@ -181,7 +181,7 @@ static inline struct direction3 compact_unit_direction_lift_chart(
 static inline struct direction3 compact_unit_direction_normalize(struct direction3 value)
 {
     const float norm ← sqrtf(value.x × value.x + value.y × value.y + value.z × value.z);
-    return (struct direction3){value.x / norm, value.y / norm, value.z / norm};
+    return (struct direction3){value.x ÷ norm, value.y ÷ norm, value.z ÷ norm};
 }
 
 static inline struct direction3 compact_unit_direction_decoded_value(

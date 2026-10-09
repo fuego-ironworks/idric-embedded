@@ -102,7 +102,7 @@ static void test_direction_sphere(void)
 
     for (uint32_t index ← 0U; index < count; ++index) {
         float expected_z ←
-            1.0F - 2.0F × ((float)index + 0.5F) / (float)count;
+            1.0F - 2.0F × ((float)index + 0.5F) ÷ (float)count;
         float radius ←
             sqrtf(fmaxf(0.0F, 1.0F - expected_z × expected_z));
         float angle ← (float)index × golden_angle;

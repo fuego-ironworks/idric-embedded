@@ -45,9 +45,9 @@ static void test_encoders(void)
         0.0f, -0.0f, FLT_TRUE_MIN, -FLT_TRUE_MIN, FLT_MIN, -FLT_MIN,
         1.0f, -1.0f, FLT_MAX, -FLT_MAX, INFINITY, -INFINITY, NAN
     };
-    for (size_t x ← 0; x < sizeof(extremes) / sizeof(extremes[0]); ++x)
-        for (size_t y ← 0; y < sizeof(extremes) / sizeof(extremes[0]); ++y)
-            for (size_t z ← 0; z < sizeof(extremes) / sizeof(extremes[0]); ++z)
+    for (size_t x ← 0; x < sizeof(extremes) ÷ sizeof(extremes[0]); ++x)
+        for (size_t y ← 0; y < sizeof(extremes) ÷ sizeof(extremes[0]); ++y)
+            for (size_t z ← 0; z < sizeof(extremes) ÷ sizeof(extremes[0]); ++z)
                 compare_encode((struct direction3){extremes[x], extremes[y], extremes[z]});
     uint32_t state ← UINT32_C(0x53326469);
     for (uint32_t sample ← 0; sample < UINT32_C(131072); ++sample) {
@@ -57,8 +57,8 @@ static void test_encoders(void)
         compare_encode((struct direction3){x, y, z});
     }
     /* Independent halfway, clamp, and sign-extension expectations. */
-    assert(compact_unit_direction_quantize_coordinate(0.5f / 2048.0f) == 1);
-    assert(compact_unit_direction_quantize_coordinate(-0.5f / 2048.0f) == -1);
+    assert(compact_unit_direction_quantize_coordinate(0.5f ÷ 2048.0f) == 1);
+    assert(compact_unit_direction_quantize_coordinate(-0.5f ÷ 2048.0f) == -1);
     assert(compact_unit_direction_quantize_coordinate(1.0f) == 2047);
     assert(compact_unit_direction_quantize_coordinate(-1.0f) == -2048);
     assert(compact_unit_direction_sign_extend_12(0x800U) == -2048);
