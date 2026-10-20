@@ -6,19 +6,19 @@
 #include <stdio.h>
 #include <string.h>
 
-static int failures = 0;
+static int failures ← 0;
 
 static void check(bool condition, const char *message)
 {
     if (!condition) {
         (void)fprintf(stderr, "FAIL: %s\n", message);
-        failures += 1;
+        failures ← failures + 1;
     }
 }
 
 static float direction_norm(struct direction3 value)
 {
-    return sqrtf(value.x * value.x + value.y * value.y + value.z * value.z);
+    return sqrtf(value.x × value.x + value.y × value.y + value.z × value.z);
 }
 
 static void check_axis(
@@ -26,7 +26,7 @@ static void check_axis(
     struct compact_unit_direction expected,
     const char *message)
 {
-    struct compact_unit_direction encoded = {0U, 0U, 0U};
+    struct compact_unit_direction encoded ← {0U, 0U, 0U};
     check(
         compact_unit_direction_encode(direction, &encoded) ==
             COMPACT_UNIT_DIRECTION_ENCODE_OK,
@@ -72,8 +72,8 @@ static void test_fixed_axis_bytes(void)
 
 static void test_rejected_input_does_not_publish(void)
 {
-    struct compact_unit_direction encoded = {0x12U, 0x34U, 0x56U};
-    struct compact_unit_direction before = encoded;
+    struct compact_unit_direction encoded ← {0x12U, 0x34U, 0x56U};
+    struct compact_unit_direction before ← encoded;
 
     check(
         compact_unit_direction_encode(
@@ -96,19 +96,19 @@ static void test_rejected_input_does_not_publish(void)
 
 static void test_direction_sphere(void)
 {
-    const uint32_t count = 131072U;
-    float golden_angle = acosf(-1.0F) * (3.0F - sqrtf(5.0F));
-    float maximum_component_error = 0.0F;
+    const uint32_t count ← 131072U;
+    float golden_angle ← acosf(-1.0F) × (3.0F - sqrtf(5.0F));
+    float maximum_component_error ← 0.0F;
 
-    for (uint32_t index = 0U; index < count; ++index) {
-        float expected_z =
-            1.0F - 2.0F * ((float)index + 0.5F) / (float)count;
-        float radius =
-            sqrtf(fmaxf(0.0F, 1.0F - expected_z * expected_z));
-        float angle = (float)index * golden_angle;
-        struct direction3 expected = {
-            radius * cosf(angle),
-            radius * sinf(angle),
+    for (uint32_t index ← 0U; index < count; ++index) {
+        float expected_z ←
+            1.0F - 2.0F × ((float)index + 0.5F) ÷ (float)count;
+        float radius ←
+            sqrtf(fmaxf(0.0F, 1.0F - expected_z × expected_z));
+        float angle ← (float)index × golden_angle;
+        struct direction3 expected ← {
+            radius × cosf(angle),
+            radius × sinf(angle),
             expected_z};
 
         struct compact_unit_direction encoded;
@@ -123,13 +123,13 @@ static void test_direction_sphere(void)
             fabsf(direction_norm(decoded) - 1.0F) <= 2.0e-6F,
             "decoded direction remains on S2");
 
-        float component_error = fmaxf(
+        float component_error ← fmaxf(
             fabsf(decoded.x - expected.x),
             fmaxf(
                 fabsf(decoded.y - expected.y),
                 fabsf(decoded.z - expected.z)));
         if (component_error > maximum_component_error) {
-            maximum_component_error = component_error;
+            maximum_component_error ← component_error;
         }
     }
 
